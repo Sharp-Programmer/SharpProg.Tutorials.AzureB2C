@@ -1,1 +1,1 @@
-# Azure B2C Demo for Tutorial
+# Azure B2C Demo solution for Tutorial
