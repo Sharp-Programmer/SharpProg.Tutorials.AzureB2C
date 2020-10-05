@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
+using static SharpProg.Tutorials.AzureB2C.Core.B2CConstants;
 
 namespace SharpProg.Tutorials.AzureB2C.WebClient
 {
@@ -25,6 +26,12 @@ namespace SharpProg.Tutorials.AzureB2C.WebClient
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<AzureAdConfig>(Configuration.GetSection(AzureAdConfigSection));
+            services.Configure<ProductApiSettings>(Configuration.GetSection(ApiConfigSection));
+
+            var azureConfig = Configuration.GetSection(AzureAdConfigSection).Get<AzureAdConfig>();
+            var productApiConfig = Configuration.GetSection(ApiConfigSection).Get<ProductApiSettings>();
+
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
@@ -35,7 +42,11 @@ namespace SharpProg.Tutorials.AzureB2C.WebClient
             });
 
             // Configuration to sign-in users with Azure AD B2C
-            services.AddMicrosoftIdentityWebAppAuthentication(Configuration, "AzureAdB2C");
+            services.AddMicrosoftIdentityWebAppAuthentication(Configuration, AzureAdConfigSection)
+                .EnableTokenAcquisitionToCallDownstreamApi(productApiConfig.Scopes)
+                .AddInMemoryTokenCaches();
+
+            services.AddDistributedMemoryCache();
 
             services.AddControllersWithViews()
                 .AddMicrosoftIdentityUI();
@@ -44,7 +55,7 @@ namespace SharpProg.Tutorials.AzureB2C.WebClient
 
             //Configuring appsettings section AzureAdB2C, into IOptions
             services.AddOptions();
-            services.Configure<OpenIdConnectOptions>(Configuration.GetSection("AzureAdB2C"));
+            services.Configure<OpenIdConnectOptions>(Configuration.GetSection(AzureAdConfigSection));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
