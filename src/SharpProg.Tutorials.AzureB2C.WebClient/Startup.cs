@@ -43,7 +43,7 @@ namespace SharpProg.Tutorials.AzureB2C.WebClient
 
             // Configuration to sign-in users with Azure AD B2C
             services.AddMicrosoftIdentityWebAppAuthentication(Configuration, AzureAdConfigSection)
-                .EnableTokenAcquisitionToCallDownstreamApi(productApiConfig.Scopes)
+                .EnableTokenAcquisitionToCallDownstreamApi(new[] { productApiConfig.ReadScope})
                 .AddInMemoryTokenCaches();
 
             services.AddDistributedMemoryCache();
